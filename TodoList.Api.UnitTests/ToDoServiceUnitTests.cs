@@ -1,6 +1,5 @@
 using Moq;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using TodoList.Api.BL;
 using TodoList.Api.DAL;
@@ -13,11 +12,11 @@ namespace TodoList.Api.UnitTests
         [Fact]
         public async void GetItemAsync_Found_record_in_DB_OK_result_Test()
         {
-            var productDataAccess = new Mock<IToDoDataRepository>();
+            var rep = new Mock<IDataRepository<TodoItem>>();
 
-            productDataAccess.Setup(t => t.GetItemAsync(It.IsAny<Guid>())).Returns(Task.Run(() => new TodoItem { }));
+            rep.Setup(t => t.GetTask(It.IsAny<Guid>())).Returns(Task.Run(() => new TodoItem { }));
 
-            IToDoService service = new ToDoService(productDataAccess.Object);
+            IToDoService service = new ToDoService(rep.Object);
 
             var res = await service.GetItemAsync(It.IsAny<Guid>());
 
@@ -32,11 +31,11 @@ namespace TodoList.Api.UnitTests
         [Fact]
         public async void GetItemAsync_not_Found_NotFound_result_Test()
         {
-            var productDataAccess = new Mock<IToDoDataRepository>();
+            var rep = new Mock<IDataRepository<TodoItem>>();
 
-            productDataAccess.Setup(t => t.GetItemAsync(It.IsAny<Guid>())).Returns(Task.FromResult<TodoItem>(null));
+            rep.Setup(t => t.GetTask(It.IsAny<Guid>())).Returns(Task.FromResult<TodoItem>(null));
 
-            IToDoService service = new ToDoService(productDataAccess.Object);
+            IToDoService service = new ToDoService(rep.Object);
 
             var res = await service.GetItemAsync(It.IsAny<Guid>());
 
@@ -53,9 +52,9 @@ namespace TodoList.Api.UnitTests
         [Fact]
         public async void SaveTodoItem_invalid_input_Test()
         {
-            var productDataAccess = new Mock<IToDoDataRepository>();
+            var rep = new Mock<IDataRepository<TodoItem>>();
 
-            IToDoService service = new ToDoService(productDataAccess.Object);
+            IToDoService service = new ToDoService(rep.Object);
 
             var res = await service.SaveTodoItem(Guid.NewGuid(), new TodoItem { Id = Guid.NewGuid() });
 
@@ -69,11 +68,10 @@ namespace TodoList.Api.UnitTests
         [Fact]
         public async void SaveTodoItem_Not_found_Test()
         {
-            var productDataAccess = new Mock<IToDoDataRepository>();
+            var rep = new Mock<IDataRepository<TodoItem>>();
+            rep.Setup(t => t.GetTask(It.IsAny<Guid>())).Returns(Task.FromResult<TodoItem>(null));
 
-            productDataAccess.Setup(t => t.GetItemAsync(It.IsAny<Guid>())).Returns(Task.FromResult<TodoItem>(null));
-
-            IToDoService service = new ToDoService(productDataAccess.Object);
+            IToDoService service = new ToDoService(rep.Object);
             var id = Guid.NewGuid();
             var res = await service.SaveTodoItem(id, new TodoItem { Id = id });
 
@@ -87,12 +85,12 @@ namespace TodoList.Api.UnitTests
         [Fact]
         public async void SaveTodoItem_DataRepository_Expceted_Exception_Test()
         {
-            var productDataAccess = new Mock<IToDoDataRepository>();
+            var rep = new Mock<IDataRepository<TodoItem>>();
 
-            productDataAccess.Setup(t => t.GetItemAsync(It.IsAny<Guid>())).Returns(Task.Run(() => new TodoItem { }));
-            productDataAccess.Setup(t => t.SaveTodoItem(It.IsAny<TodoItem>())).Throws(new Exception("My unexpected exception"));
+            rep.Setup(t => t.GetTask(It.IsAny<Guid>())).Returns(Task.FromResult<TodoItem>(new TodoItem { }));
+            rep.Setup(t => t.UpdateTask(It.IsAny<TodoItem>())).Throws(new Exception("My unexpected exception"));
 
-            IToDoService service = new ToDoService(productDataAccess.Object);
+            IToDoService service = new ToDoService(rep.Object);
             var id = Guid.NewGuid();
             var res = await service.SaveTodoItem(id, new TodoItem { Id = id });
 
@@ -108,12 +106,12 @@ namespace TodoList.Api.UnitTests
         [Fact]
         public async void SaveTodoItem_DataRepository_OK_Test()
         {
-            var productDataAccess = new Mock<IToDoDataRepository>();
+            var rep = new Mock<IDataRepository<TodoItem>>();
 
-            productDataAccess.Setup(t => t.GetItemAsync(It.IsAny<Guid>())).Returns(Task.Run(() => new TodoItem { }));
-            productDataAccess.Setup(t => t.SaveTodoItem(It.IsAny<TodoItem>())).Returns(Task.Run(() => new TodoItem { }));
+            rep.Setup(t => t.GetTask(It.IsAny<Guid>())).Returns(Task.Run(() => new TodoItem { }));
+            rep.Setup(t => t.UpdateTask(It.IsAny<TodoItem>())).Returns(Task.Run(() => new TodoItem { }));
 
-            IToDoService service = new ToDoService(productDataAccess.Object);
+            IToDoService service = new ToDoService(rep.Object);
             var id = Guid.NewGuid();
             var res = await service.SaveTodoItem(id, new TodoItem { Id = id });
 
@@ -129,9 +127,9 @@ namespace TodoList.Api.UnitTests
         [Fact]
         public async void AddTodoItem_Description_Empty_test()
         {
-            var productDataAccess = new Mock<IToDoDataRepository>();
+            var rep = new Mock<IDataRepository<TodoItem>>();
 
-            IToDoService service = new ToDoService(productDataAccess.Object);
+            IToDoService service = new ToDoService(rep.Object);
             var res = await service.AddTodoItem(new TodoItem { });
 
 
@@ -143,58 +141,18 @@ namespace TodoList.Api.UnitTests
         }
 
 
-        [Fact]
-        public async void AddTodoItem_Description_Already_Exists_test()
-        {
-            var productDataAccess = new Mock<IToDoDataRepository>();
-
-            productDataAccess.Setup(t => t.GetItemsAsync(It.IsAny<Func<TodoItem, bool>>())).Returns(Task.Run(() => (IEnumerable<TodoItem>)new List<TodoItem> { new TodoItem { } }));
-            //productDataAccess.Setup(t => t.SaveTodoItem(It.IsAny<TodoItem>())).Returns(Task.Run(() => new TodoItem { }));
-
-            IToDoService service = new ToDoService(productDataAccess.Object);
-            var id = Guid.NewGuid();
-            var res = await service.AddTodoItem(new TodoItem { Id = id, Description = "Description already exsits" });
-
-
-            Assert.True(res != null);
-            Assert.True(res.Result == null);
-            Assert.Equal("Description already exists", res.ComplexResult.Message);
-            Assert.True(res.ComplexResult.ResultType == ResultType.BadRequest);
-
-        }
-
-        [Fact]
-        public async void AddTodoItem_Expceted_Exception_Test()
-        {
-            var productDataAccess = new Mock<IToDoDataRepository>();
-
-            productDataAccess.Setup(t => t.GetItemsAsync(It.IsAny<Func<TodoItem, bool>>())).Returns(Task.Run(() => (IEnumerable<TodoItem>)new List<TodoItem> { }));
-            productDataAccess.Setup(t => t.AddTodoItem(It.IsAny<TodoItem>())).Throws(new Exception("My unexpected exception"));
-
-            IToDoService service = new ToDoService(productDataAccess.Object);
-            var id = Guid.NewGuid();
-            var res = await service.AddTodoItem(new TodoItem { Id = id, Description = "Description already exsits" });
-
-
-            Assert.True(res != null);
-            Assert.True(res.Result == null);
-            Assert.Contains("My unexpected exception", res.ComplexResult.Message);
-            Assert.True(res.ComplexResult.ResultType != ResultType.OK);
-            Assert.True(res.ComplexResult.ResultType == ResultType.UnknownError);
-
-        }
-
-
+      
 
         [Fact]
         public async void AddTodoItem_OK_Test()
         {
-            var productDataAccess = new Mock<IToDoDataRepository>();
+            var rep = new Mock<IDataRepository<TodoItem>>();
 
-            productDataAccess.Setup(t => t.GetItemsAsync(It.IsAny<Func<TodoItem, bool>>())).Returns(Task.Run(() => (IEnumerable<TodoItem>)new List<TodoItem> { }));
-            productDataAccess.Setup(t => t.AddTodoItem(It.IsAny<TodoItem>())).Returns(Task.FromResult<TodoItem>(null));
+            rep.Setup(t => t.GetTask(It.IsAny<Guid>())).Returns(Task.Run(() => new TodoItem { }));
 
-            IToDoService service = new ToDoService(productDataAccess.Object);
+            rep.Setup(t => t.CreateTask(It.IsAny<TodoItem>())).Returns(Task.FromResult<TodoItem>(null));
+
+            IToDoService service = new ToDoService(rep.Object);
             var id = Guid.NewGuid();
             var res = await service.AddTodoItem(new TodoItem { Id = id, Description = "some description" });
 
