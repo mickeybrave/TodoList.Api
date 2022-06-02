@@ -39,6 +39,8 @@ namespace TodoList.Api.BL
         Task<DataResult<TodoItem>> SaveTodoItem(Guid id, TodoItem todoItem);
 
         Task<DataResult<TodoItem>> AddTodoItem(TodoItem todoItem);
+
+        Task<DataResult<TodoItem>> DeleteTodoItem(TodoItem todoItem);
     }
 
     public class ToDoService : IToDoService
@@ -121,5 +123,18 @@ namespace TodoList.Api.BL
 
         }
 
+        public async Task<DataResult<TodoItem>> DeleteTodoItem(TodoItem todoItem)
+        {
+            try
+            {
+                await _dataRepository.DeleteTodoItem(todoItem);
+            }
+            catch (Exception ex)
+            {
+                return new DataResult<TodoItem>(null, new ComplexResult { Message = ex.Message, ResultType = ResultType.UnknownError });
+            }
+
+            return new DataResult<TodoItem>(todoItem, new ComplexResult { Message = null, ResultType = ResultType.NoContent });
+        }
     }
 }

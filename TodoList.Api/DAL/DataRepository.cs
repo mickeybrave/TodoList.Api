@@ -13,6 +13,7 @@ namespace TodoList.Api.DAL
         Task<TodoItem> GetItemAsync(Guid id);
         Task SaveTodoItem(TodoItem todoItem);
         Task AddTodoItem(TodoItem todoItem);
+        Task DeleteTodoItem(TodoItem todoItem);
     }
 
     public class ToDoDataRepository : IToDoDataRepository
@@ -29,7 +30,7 @@ namespace TodoList.Api.DAL
             return _context.TodoItems.FirstOrDefaultAsync(f => f.Id == id);
         }
 
-       
+
 
         public Task<IEnumerable<TodoItem>> GetItemsAsync(Func<TodoItem, bool> filter)
         {
@@ -63,6 +64,18 @@ namespace TodoList.Api.DAL
             }
         }
 
+        public async Task DeleteTodoItem(TodoItem todoItem)
+        {
+            try
+            {
+                _context.Remove(todoItem);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 
 

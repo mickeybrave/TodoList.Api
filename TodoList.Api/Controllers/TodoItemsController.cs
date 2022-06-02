@@ -87,5 +87,17 @@ namespace TodoList.Api.Controllers
             }
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(TodoItem todoItem)
+        {
+            var result = await _toDoService.DeleteTodoItem(todoItem);
+
+            if (result.ComplexResult.ResultType == ResultType.NotFound)
+            {
+                return NotFound(result.ComplexResult.Message);
+            }
+            return Ok(result.Result);
+        }
+
     }
 }
