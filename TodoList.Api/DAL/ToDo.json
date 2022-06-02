@@ -1,0 +1,17 @@
+[
+  {
+    "id": "bd391519-ddfd-46cb-809b-bc52f1e3094c",
+    "description": "Item 1",
+    "isCompleted": false
+  },
+  {
+    "id": "70a790f1-8471-4893-9e9f-caefd5d23a4e",
+    "description": "Item 2",
+    "isCompleted": false
+  },
+  {
+    "id": "b9d244f5-f511-4748-89bf-e01073ad7fb3",
+    "description": "Item 3",
+    "isCompleted": false
+  }
+]

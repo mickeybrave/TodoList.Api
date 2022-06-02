@@ -32,7 +32,7 @@ namespace TodoList.Api.BL
     }
     public interface IToDoService
     {
-        Task<IEnumerable<TodoItem>> GetCompletedItemsAsync();
+        Task<IEnumerable<TodoItem>> GetAllItemsAsync();
 
         Task<DataResult<TodoItem>> GetItemAsync(Guid id);
 
@@ -40,28 +40,28 @@ namespace TodoList.Api.BL
 
         Task<DataResult<TodoItem>> AddTodoItem(TodoItem todoItem);
 
-        Task<DataResult<TodoItem>> DeleteTodoItem(TodoItem todoItem);
+        Task<DataResult<TodoItem>> DeleteTodoItem(Guid id);
     }
 
     public class ToDoService : IToDoService
     {
-        private readonly IToDoDataRepository _dataRepository;
+        private readonly IDataRepository<TodoItem> _dataRepository;
 
-        public ToDoService(IToDoDataRepository dataRepository)
+        public ToDoService(IDataRepository<TodoItem> dataRepository)
         {
             this._dataRepository = dataRepository;
         }
 
 
 
-        public Task<IEnumerable<TodoItem>> GetCompletedItemsAsync()
+        public Task<IEnumerable<TodoItem>> GetAllItemsAsync()
         {
-            return Task.Run(() => _dataRepository.GetItemsAsync(x => !x.IsCompleted));
+            return Task.Run(() => _dataRepository.GetAllTask());
         }
 
         public async Task<DataResult<TodoItem>> GetItemAsync(Guid id)
         {
-            var res = await _dataRepository.GetItemAsync(id);
+            var res = await _dataRepository.GetTask(id);
 
             if (res == null)
             {
@@ -78,7 +78,7 @@ namespace TodoList.Api.BL
             {
                 return new DataResult<TodoItem>(null, new ComplexResult { Message = $"Id={id} provided is not the id in ToDo item provided (id={todoItem.Id})", ResultType = ResultType.BadRequest });
             }
-            var itemFoundInDb = await _dataRepository.GetItemAsync(id);
+            var itemFoundInDb = await _dataRepository.GetTask(id);
 
             if (itemFoundInDb == null)
             {
@@ -87,7 +87,7 @@ namespace TodoList.Api.BL
 
             try
             {
-                await _dataRepository.SaveTodoItem(itemFoundInDb);
+                await _dataRepository.UpdateTask(itemFoundInDb);
             }
             catch (Exception ex)
             {
@@ -103,16 +103,9 @@ namespace TodoList.Api.BL
                 return new DataResult<TodoItem>(null, new ComplexResult { Message = "Description is required", ResultType = ResultType.BadRequest });
             }
 
-            var incompleteItemsWithSameDesciption = await _dataRepository.GetItemsAsync(x => x.Description.ToLowerInvariant() == todoItem.Description.ToLowerInvariant() && !x.IsCompleted);
-
-            if (incompleteItemsWithSameDesciption.Any())
-            {
-                return new DataResult<TodoItem>(null, new ComplexResult { Message = "Description already exists", ResultType = ResultType.BadRequest });
-            }
-
             try
             {
-                await _dataRepository.AddTodoItem(todoItem);
+                await _dataRepository.CreateTask(todoItem);
             }
             catch (Exception ex)
             {
@@ -123,18 +116,18 @@ namespace TodoList.Api.BL
 
         }
 
-        public async Task<DataResult<TodoItem>> DeleteTodoItem(TodoItem todoItem)
+        public async Task<DataResult<TodoItem>> DeleteTodoItem(Guid id)
         {
             try
             {
-                await _dataRepository.DeleteTodoItem(todoItem);
+                await _dataRepository.DeleteTask(id);
             }
             catch (Exception ex)
             {
                 return new DataResult<TodoItem>(null, new ComplexResult { Message = ex.Message, ResultType = ResultType.UnknownError });
             }
 
-            return new DataResult<TodoItem>(todoItem, new ComplexResult { Message = null, ResultType = ResultType.NoContent });
+            return new DataResult<TodoItem>(null, new ComplexResult { Message = $"Item with id ={id} has been deleted", ResultType = ResultType.NoContent });
         }
     }
 }

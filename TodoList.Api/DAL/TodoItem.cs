@@ -1,13 +1,22 @@
 using System;
+using System.Text.Json.Serialization;
 
-namespace TodoList.Api
+namespace TodoList.Api.DAL
 {
-    public class TodoItem
+    public interface IDataObject
     {
         public Guid Id { get; set; }
+    }
 
+    public class TodoItem : IDataObject
+    {
+        [JsonPropertyName("id")]
+        public Guid Id { get; set; }
+
+        [JsonPropertyName("description")]
         public string Description { get; set; }
 
+        [JsonPropertyName("isCompleted")]
         public bool IsCompleted { get; set; }
     }
 }

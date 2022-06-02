@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using TodoList.Api.BL;
+using TodoList.Api.DAL;
 
 namespace TodoList.Api.Controllers
 {
@@ -12,14 +13,10 @@ namespace TodoList.Api.Controllers
     [ApiController]
     public class TodoItemsController : ControllerBase
     {
-        private readonly TodoContext _context;
-        private readonly ILogger<TodoItemsController> _logger;
         private readonly IToDoService _toDoService;
 
-        public TodoItemsController(TodoContext context, ILogger<TodoItemsController> logger, IToDoService toDoService)
+        public TodoItemsController(IToDoService toDoService)
         {
-            _context = context;
-            _logger = logger;
             this._toDoService = toDoService;
         }
 
@@ -27,7 +24,7 @@ namespace TodoList.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTodoItems()
         {
-            var results = await _toDoService.GetCompletedItemsAsync();
+            var results = await _toDoService.GetAllItemsAsync();
             return Ok(results);
         }
 
@@ -88,9 +85,9 @@ namespace TodoList.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(TodoItem todoItem)
+        public async Task<IActionResult> Delete(Guid id)
         {
-            var result = await _toDoService.DeleteTodoItem(todoItem);
+            var result = await _toDoService.DeleteTodoItem(id);
 
             if (result.ComplexResult.ResultType == ResultType.NotFound)
             {

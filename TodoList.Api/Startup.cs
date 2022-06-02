@@ -38,10 +38,10 @@ namespace TodoList.Api
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TodoList.Api", Version = "v1" });
             });
-            services.AddScoped(typeof(IToDoDataRepository), typeof(ToDoDataRepository));
+            services.AddSingleton<IDataRepository<TodoItem>, DataRepository<TodoItem>>();
+            services.AddSingleton<IDataUpdater<TodoItem>, TodoItemUpdater<TodoItem>>();
             services.AddScoped(typeof(IToDoService), typeof(ToDoService));
 
-            services.AddDbContext<TodoContext>(opt => opt.UseInMemoryDatabase("TodoItemsDB"));
 
         }
 
