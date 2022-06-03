@@ -9,8 +9,9 @@ using TodoList.Api.DAL;
 
 namespace TodoList.Api.Controllers
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
     [ApiController]
+    [Route("")]
     public class TodoItemsController : ControllerBase
     {
         private readonly IToDoService _toDoService;
