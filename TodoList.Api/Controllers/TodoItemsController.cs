@@ -43,7 +43,7 @@ namespace TodoList.Api.Controllers
 
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTodoItem(Guid id, TodoItem todoItem)
+        public async Task<IActionResult> PutTodoItem(Guid id, [FromBody]TodoItem todoItem)
         {
             var serviceResult = await _toDoService.SaveTodoItem(id, todoItem);
 

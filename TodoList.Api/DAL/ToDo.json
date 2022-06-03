@@ -1,17 +1,1 @@
-[
-  {
-    "id": "bd391519-ddfd-46cb-809b-bc52f1e3094c",
-    "description": "Item 1",
-    "isCompleted": false
-  },
-  {
-    "id": "70a790f1-8471-4893-9e9f-caefd5d23a4e",
-    "description": "Item 2",
-    "isCompleted": false
-  },
-  {
-    "id": "b9d244f5-f511-4748-89bf-e01073ad7fb3",
-    "description": "Item 3",
-    "isCompleted": false
-  }
-]
+[{"Id":"bd391519-ddfd-46cb-809b-bc52f1e3094c","Description":"Item 1","IsCompleted":false},{"Id":"70a790f1-8471-4893-9e9f-caefd5d23a4e","Description":"Item 2","IsCompleted":false},{"Id":"b9d244f5-f511-4748-89bf-e01073ad7fb3","Description":"Item 3","IsCompleted":false},{"Id":"574676ad-8f1f-4d16-94dc-b8c3d702c524","Description":"do bla-bla bla","IsCompleted":true}]

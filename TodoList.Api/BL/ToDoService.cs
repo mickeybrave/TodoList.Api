@@ -87,7 +87,7 @@ namespace TodoList.Api.BL
 
             try
             {
-                await _dataRepository.UpdateTask(itemFoundInDb);
+                await _dataRepository.UpdateTask(todoItem);
             }
             catch (Exception ex)
             {
